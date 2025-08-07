@@ -1,32 +1,41 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 
 app = FastAPI()
-
-users ={
-    'vova_1': {
-        "name": "John Doe",
-        "surename": "Smith",
-        "birth_year": 1990
-    },
-    'vova_2': {
-        "name": "John Doe2",
-        "surename": "Smith2",
-        "birth_year": 1991
-    }
+library = {
+    "Ліна Костенко": [
+        {"title": "Маруся Чурай", "pages": 352},
+        {"title": "Берестечко", "pages": 288},
+        {"title": "Записки українського самашедшого", "pages": 304}
+    ],
+    "Джордж Оруелл": [
+        {"title": "1984", "pages": 328},
+        {"title": "Animal Farm", "pages": 112}
+    ],
+    "Тарас Шевченко": [
+        {"title": "Кобзар", "pages": 480},
+        {"title": "Гайдамаки", "pages": 152}
+    ],
+    "Джоан Роулінг": [
+        {"title": "Harry Potter and the Philosopher's Stone", "pages": 223},
+        {"title": "Harry Potter and the Chamber of Secrets", "pages": 251},
+        {"title": "Harry Potter and the Prisoner of Azkaban", "pages": 317}
+    ]
 }
 
-@app.get("/")
-def read_root():
-    return {"message": "Привіт, FastAPI!"}
-
-@app.get('/user/get-all')
-def get_all_users():
-    return users
-
-@app.post('/user/create')
-def create_new_user(user_login, name,  surename, year):
-    user={
-        "name": name,
-        "surename": surename,
-        "birth_year": year
-    }
+@app.post("/add_book")
+async def add_book(author: str = Query(..., min_length=2, max_length=1999, title="Author name"),
+                title: str = Query(..., min_length=2, max_length=1999, title="Book title"),
+                pages: int = Query(..., gt=0, title="Number of pages")):
+    if author not in library:
+        library[author] = []
+    library[author].append({"title": title, "pages": pages})
+    return {"message": "Book added successfully"}
+@app.get('/all')
+def get_all_books():
+    return library
+@app.get('/author/{author_name}')
+async def get_books_by_author(author_name: str):
+    if author_name in library:
+        return {author_name: library[author_name]}
+    else:
+        return {"message": "Author not found"}
