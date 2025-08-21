@@ -16,3 +16,11 @@ class Book(Base):
     pages = Column(Integer, default=10)
     
     author_id = Column(Integer, ForeignKey('authors.id'))
+    author = relationship("Author")
+
+class User(Base):
+    __tablename__ = "users"
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String(150), unique=True, nullable=False)
+    email = Column(String(150), unique=True, nullable=True)
+    password = Column(String, nullable=False)
